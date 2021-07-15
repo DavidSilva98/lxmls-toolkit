@@ -56,9 +56,17 @@ def train():
             # ----------
             # Solution to Exercise 6.3
 
-            raise NotImplementedError("Exercise 6.3")
+            # raise NotImplementedError("Exercise 6.3")
 
-        # code needed at this identation level!
+            value = model()
+            # -grad log p(s,a) G_t(s,a) (minus because we are minimizing)
+            value = -value[state, action] * rew  # this is how we get the gradients in pytorch
+            grad_list.append(value.view(1, -1))
+        
+        grads = torch.cat(grad_list, 0).mean()
+        grads.backward()
+        optim.step()
+        optim.zero_grad()
 
         # End of solution to Exercise 6.3
         # ----------

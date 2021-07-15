@@ -142,8 +142,12 @@ class HMM(sc.SequenceClassifier):
 
         # ----------
         # Solution to Exercise 10
-
-        raise NotImplementedError("Complete Exercise 10")
+        # import pdb; pdb.set_trace()
+        self.initial_counts += state_posteriors[0, :]
+        self.final_counts += state_posteriors[-1, :]
+        self.transition_counts += np.sum(transition_posteriors, axis=0)
+        for pos in range(len(sequence.x)):
+            self.emission_counts[sequence.x[pos], :] += state_posteriors[pos, :]
 
         # End of solution to Exercise 10
         # ----------

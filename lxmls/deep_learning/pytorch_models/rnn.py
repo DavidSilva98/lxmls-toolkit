@@ -92,7 +92,29 @@ class PytorchRNN(RNN):
         # ----------
         # Solution to Exercise 2
 
-        raise NotImplementedError("Implement Exercise 2")
+        # Word Embeddings
+        z_e = self.embedding_layer(input)
+
+        # Recurrent layer
+        h = Variable(torch.FloatTensor(1, hidden_size).zero_())
+        hidden_variables = []
+        for t in range(nr_steps):  # iterates over sequence
+
+            # Linear
+            z_t = torch.matmul(z_e[t, :], torch.t(W_x)) + \
+                torch.matmul(h, torch.t(W_h))
+
+            # Non-linear (sigmoid)
+            h = torch.sigmoid(z_t)
+
+            hidden_variables.append(h)
+
+        # Output layer
+        h_out = torch.cat(hidden_variables, 0)
+        y = torch.matmul(h_out, torch.t(W_y))
+
+        # Log-Softmax
+        log_p_y = self.logsoftmax(y)
 
         # End of solution to Exercise 2
         # ----------
@@ -282,11 +304,11 @@ class PolicyRNN(FastPytorchRNN):
             gamma=self._gamma,
             dim=0
         )
-        ### TODO: Compute here the loss using the reinforce update
-        ### beginning of exercise 6.5
-        raise Exception("Complete exercise 6.5")
-        ### end of exercise 6.5
-
+        # Calculate loss
+        selected_logprobs = -R.reshape(-1) * \
+            log_p_y[np.arange(len(output)), output]
+        # sum in time and class dimension mean over batch size
+        loss = selected_logprobs.sum() / float(len(out.batch_sizes))
         return loss
 
     def cost_to_go(self, rwd, sizes=None, gamma=0.99, dim=1):

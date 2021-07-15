@@ -42,7 +42,23 @@ class MultinomialNaiveBayes(lc.LinearClassifier):
         # ----------
         # Solution to Exercise 1
 
-        raise NotImplementedError("Complete Exercise 1")
+        # Get prior probabilities
+        _, frequencies = np.unique(y, return_counts = True)
+        prior = frequencies / n_docs
+
+        # Get likelihoods
+        total_word_counts = np.sum(x, axis=0)
+        for i, c in enumerate(classes):
+            # filter documents of class c
+            filter_docs = x[(y == c)[:,0], :]
+
+            # get word counts for documents of class c - with smoothing
+            # filter_word_counts = np.sum(filter_docs, axis=0)
+            filter_word_counts = 1 + np.sum(filter_docs, axis=0)
+
+            # get likelihood for class c - with smoothing
+            # likelihood[:, i] = filter_word_counts/ total_word_counts
+            likelihood[:, i] = filter_word_counts/ (n_words + total_word_counts)
 
         # End solution to Exercise 1
         # ----------

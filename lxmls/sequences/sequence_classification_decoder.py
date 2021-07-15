@@ -92,6 +92,9 @@ class SequenceClassificationDecoder:
         # Variables storing the Viterbi scores.
         viterbi_scores = np.zeros([length, num_states]) + logzero()
 
+        # Variables storing the Backtrack scores.
+        backward = np.zeros([length, num_states]) + logzero()
+
         # Variables storing the paths to backtrack.
         viterbi_paths = -np.ones([length, num_states], dtype=int)
 
@@ -100,22 +103,30 @@ class SequenceClassificationDecoder:
 
         # ----------
         # Solution to Exercise 8
+        # Note the fact that multiplication in log domain turns a sum and sum turns a logsum
 
-        raise NotImplementedError("Complete Exercise 8")
-
-        #### Little guide of the implementation ####################################
         # Initializatize the viterbi scores
-        #
+        viterbi_scores[0, :] = emission_scores[0, :] + initial_scores
+
         # Do the double of the viterbi loop (lines 7 to 12 in the guide pdf)
-        # from 1 to length
-        #     from 0 to num_states
-        #       ...
-        #
+        for pos in range(1, length):
+            for current_state in range(num_states):
+                z = viterbi_scores[pos-1, :] + transition_scores[pos-1, current_state, :]
+                viterbi_scores[pos, current_state] = np.max(z) + emission_scores[pos, current_state]
+                backward[pos, current_state] = np.argmax(z)
+
         # define the best_path and best_score
-        #
+        z = viterbi_scores[length-1, :] + final_scores
+        best_score = np.max(z)
+        best_path[-1] = np.argmax(z)
+
         # backtrack the best_path using the viterbi paths (lines 17-18 pseudocode in the guide pdf)
-        #
+        for pos in reversed(range(length-1)):
+            best_path[pos] = backward[pos + 1, best_path[pos + 1]]
+
         # return best_path and best_score
+        return best_path, best_score
+
         ############################################################################
 
         # End of solution to Exercise 8

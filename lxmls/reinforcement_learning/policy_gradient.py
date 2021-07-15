@@ -21,7 +21,8 @@ class PolicyGradient(nn.Module):
         # ----------
         # Solution to Exercise 6.4
 
-        raise Exception("Complete exercise 6.4")
+        input1 = torch.autograd.Variable(torch.FloatTensor([state]))
+        return F.log_softmax(self.linear2(F.sigmoid(self.linear(input1))))
 
         # End of solution to Exercise 6.4
         # ----------

@@ -85,6 +85,10 @@ class NumpyMLP(MLP):
         log_prob_y, layer_inputs = self.log_forward(input)
         prob_y = np.exp(log_prob_y)
 
+        # layer_inputs gives the input matrix to each of the layers of the NN.
+        # the first layer input is X, the second layer input is a the z~1 (output 
+        # of layer 1) for each sample (N, K), where N is the sample size and K is
+        # the number of nodes in layer 1.
         num_examples, num_clases = prob_y.shape
         num_hidden_layers = len(self.parameters) - 1
 
@@ -94,8 +98,31 @@ class NumpyMLP(MLP):
 
         # ----------
         # Solution to Exercise 2
+        assert input.shape[0] == output.shape[0]
 
-        raise NotImplementedError("Implement Exercise 2")
+        # Initialize the error at the last layer. We are using softmax with CE cost - algorithm 8.11
+        output_ohc = np.eye(num_clases)[output]
+        errors.append((output_ohc - prob_y))
+        
+        # Backpropagate the error through the hidden layers
+        for n in reversed(range(num_hidden_layers)):
+            # Backpropagate the error through the linear layer
+            inter_error = errors[-1] @ self.parameters[n + 1][0]
+
+            # Backpropagate the error through the non-linearity
+            layer_outputs = layer_inputs[n + 1]
+            error = inter_error * layer_outputs * (np.ones_like(layer_outputs) - layer_outputs)
+            errors.append(error)
+            
+        # Compute the gradients using the errors
+        # gradients is a list of lists with indices (layer, (W, b))
+        gradients = []
+
+        for n in range(num_hidden_layers + 1):
+            # import pdb; pdb.set_trace()
+            dw = -1 / num_examples * (errors[n - 1].T @ layer_inputs[n])
+            db = -1 / num_examples * np.sum(errors[n - 1].T, axis=1)
+            gradients.append([dw, db])
         
         # End of solution to Exercise 2
         # ----------
